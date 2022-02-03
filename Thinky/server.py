@@ -60,7 +60,8 @@ async def game_loop(game_code):
     emit('newBoard', {'board': game.current_board}, to=game_code) # Tell everyone newBoard
     game.status = 'waitingForWord'
 
-
+    sleep(3) # Give some time for players to look over the board
+    emit('countdown', {'time', })
 
 ################
 # HTTTP ROUTES #
@@ -133,4 +134,4 @@ def start_game_event(json):
     # Call start the game loop
     await game_loop(game_code)
 
-app.run()
+#app.run()
