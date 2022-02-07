@@ -193,6 +193,30 @@ def start_game_event(json):
 
 @socket.on('chooseAnswer')
 def choose_answer_event(json):
-    
+    game = active_games[json['gameCode']]
+    player = game.get_player_by_socket_id(request.sid)
+    answer = json['answer'] # Should be an id
 
+    if not player:
+        emit('chooseAnswerResponse', {'status': 401, 'message': 'You are not in the game'}, to=request.sid)
+        return
+
+    if player.answer_chosen != None:
+        # Player already answered
+        emit('chooseAnswerResponse', {'status': 409, 'You\'ve already answered'}, to=request.sid)
+        return
+    
+    if not game.listen_for_answers:
+        # Currently not listening for answers
+        emit('chooseAnswerResponse', {'status': 400}, to=request.sid)
+        return
+
+    # Check if the answer id even exists
+    term = game.get_term_by_id_from_current_board(answer)
+    if term == None:
+        emit('chooseAnswerResponse', {'status': 400}, to=request.sid)
+        return
+    
+    player.answer_chosen = answer
+    
 app.run()
