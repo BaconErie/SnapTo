@@ -8,10 +8,6 @@ app = Flask(__name__)
 socket = SocketIO(app)
 active_games = {}
 
-####################
-# HELPER FUNCTIONS #
-####################
-
 def generate_game_code():
     new_game_code = randint(100000, 999999)
     if new_game_code in active_games.keys():
@@ -79,19 +75,17 @@ def pick_board(game):
     index = randint(0, len(game.boards))
     game.current_board = game.boards[index]
     game.boards.pop(index) # Remove the currently displayed board from boards
-    
-##################
-# MAIN GAME LOOP #
-##################
 
-async def game_loop(game_code):
+async def start_game(game_code):
     game = active_games[game_code]    
 
     emit('startGame', to=game_code) # Tell everyone in the room to start game
     game.status = 'waitingGameStart'
 
     setup_boards(game)
-    
+
+def new_board(game_code):
+    game = active_games[game_code]
     pick_board(game)
 
     # Set the game.word_bucket to the current word
@@ -101,13 +95,17 @@ async def game_loop(game_code):
 
     emit('newBoard', {'board': game.current_board}, to=game_code) # Tell everyone newBoard
     game.status = 'waitingForWord'
-    
-    # Set the word early on
+
+    sleep(3) # Give some time for players to look over the board
+
+def new_word(game_code):
+    game = active_games[game_code]
+
     index = randint(0, len(game.word_bucket) - 1)
     game.current_word = game.word_bucket[index]
     game.word_bucket.pop(index) # Deletes the word we have chosen
 
-    sleep(3) # Give some time for players to look over the board
+
     countdown_end = time() + 3
 
     emit('countdown', {'time': countdown_end}, to=game_code)
@@ -134,7 +132,21 @@ async def game_loop(game_code):
             emit('answerResult', {'correct': True, 'blank': False, 'correctAnswer': correct_answer, 'currentScore': player.score}, to=socket_id)
             
         player.answer_chosen = None
+    
+    ### Create a leaderboard; a list of dictionaries with the player name and score
+    leaderboard = []
+    for player in game.players:
+        current_player_dict = {}
+        current_player_dict['name'] = player.name
+        current_player_dict['score'] = player.score
+        
+        leaderboard.append(current_player_dict)
 
+    # Sort the leaderboard so that the player with the highest score comes first
+    leaderboard.sort(key=lambda d: d['score'], reverse=True)
+
+    emit('leaderboard', {'leaderboard': leaderboard}, to=game_code)
+    
 ################
 # HTTTP ROUTES #
 ################
@@ -202,9 +214,11 @@ def start_game_event(json):
             # Not the host, return 403
             emit('startGameResponse', {'status': 403}, to=socket_id)
             return
-    
-    # Call start the game loop
-    await game_loop(game_code)
+
+
+    start_game(game_code)
+    new_board(game_code)
+    new_word(game_code)
 
 @socket.on('chooseAnswer')
 def choose_answer_event(json):
