@@ -119,6 +119,21 @@ async def game_loop(game_code):
 
     game.listen_for_answers = False
 
+    for player in game.players:
+        answer = player.answer_chosen
+        socket_id = player.socket_id
+        correct_answer_id = game.current_word['id']
+        correct_answer = game.current_word
+        
+        if answer == None:
+            emit('answerResult', {'correct': False, 'blank': True, 'correctAnswer': correct_answer, 'currentScore': player.score}, to=socket_id)        
+        elif answer != correct_answer_id:
+            emit('answerResult', {'correct': False, 'blank': False, 'correctAnswer': correct_answer, 'currentScore': player.score}, to=socket_id)
+        elif answer == correct_answer_id:
+            player.score = player.score + 100
+            emit('answerResult', {'correct': True, 'blank': False, 'correctAnswer': correct_answer, 'currentScore': player.score}, to=socket_id)
+            
+        player.answer_chosen = None
 
 ################
 # HTTTP ROUTES #
@@ -203,7 +218,7 @@ def choose_answer_event(json):
 
     if player.answer_chosen != None:
         # Player already answered
-        emit('chooseAnswerResponse', {'status': 409, 'You\'ve already answered'}, to=request.sid)
+        emit('chooseAnswerResponse', {'status': 409, 'message': 'You\'ve already answered'}, to=request.sid)
         return
     
     if not game.listen_for_answers:
