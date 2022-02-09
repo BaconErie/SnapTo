@@ -96,6 +96,8 @@ def new_board(game_code):
     emit('newBoard', {'board': game.current_board}, to=game_code) # Tell everyone newBoard
     game.status = 'waitingForWord'
 
+    game.words_displayed = 0
+
     sleep(3) # Give some time for players to look over the board
 
 def new_word(game_code):
@@ -113,6 +115,7 @@ def new_word(game_code):
 
     game.listen_for_answers = True
     emit('newWord', {'word': game.current_word}, to=game_code)
+    game.words_displayed = game.words_displayed + 1
     sleep(3)
 
     game.listen_for_answers = False
@@ -222,9 +225,15 @@ def start_game_event(json):
 
 @socket.on('chooseAnswer')
 def choose_answer_event(json):
+    # Check if game exists
+    if json['gameCode'] not in active_games.keys():
+        emit('chooseAnswerResponse', {'status': 404, 'message': 'Game not found'}, to=request.sid)
+        return
+
     game = active_games[json['gameCode']]
     player = game.get_player_by_socket_id(request.sid)
     answer = json['answer'] # Should be an id
+
 
     if not player:
         emit('chooseAnswerResponse', {'status': 401, 'message': 'You are not in the game'}, to=request.sid)
@@ -247,5 +256,27 @@ def choose_answer_event(json):
         return
     
     player.answer_chosen = answer
+
+@socket.on('nextWord')
+def next_word_event(json):
+    game_code = json['gameCode']
+
+    # Check if game exists
+    if game_code not in active_games.keys():
+        emit('nextWordResponse', {'status': 404, 'message': 'Game not found'}, to=request.sid)
+        return
     
+    game = active_games[game_code]
+    if request.sid != game.host_socket_id:
+        # Not the host, return 403
+        emit('nextWordResponse', {'status': 403, 'message': 'You are not the host'}, to=request.sid)
+        return
+
+    # Check if we should switch to the next board
+    if game.words_displayed == 2:
+        new_board(game_code)
+    
+    new_word(game_code)
+
+
 app.run()
