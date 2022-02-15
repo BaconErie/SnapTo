@@ -8,6 +8,27 @@ app = Flask(__name__)
 socket = SocketIO(app)
 active_games = {}
 
+def create_leaderboard(game):
+    ### Create a leaderboard; a list of dictionaries with the player name and score
+    leaderboard = []
+    for player in game.players:
+        current_player_dict = {}
+        current_player_dict['name'] = player.name
+        current_player_dict['score'] = player.score
+        
+        leaderboard.append(current_player_dict)
+
+    # Sort the leaderboard so that the player with the highest score comes first
+    leaderboard.sort(key=lambda d: d['score'], reverse=True)
+    
+    return leaderboard
+
+def sort_players_by_score(game):
+    '''Returns a list of player objects sorted by higher scoring first'''
+    list_of_players = sorted(game.players, key=lambda player: player.score, reverse=True)
+
+    return list_of_players
+
 def generate_game_code():
     new_game_code = randint(100000, 999999)
     if new_game_code in active_games.keys():
@@ -70,6 +91,21 @@ def setup_boards(game):
                     # Therefore there was no overlap
                     # Set is_overlapping to False
                     is_overlapping = False
+
+def end_game(game_code):
+    game = active_games[game_code]
+    host_socket_id = game.host_socket_id
+    # Send the host the sorted list of player names and scores
+    leaderboard = create_leaderboard(game)
+
+    emit('endGame', {'leaderboard': leaderboard}, to=host_socket_id)
+
+    # Then loop through all the players and send them
+    for player in game.players:
+        emit('endGameScore', {'score': player.score}, to=player.socket_id)
+
+    # Remove the game from the active games
+    active_games.pop(game_code)
 
 def pick_board(game):
     index = randint(0, len(game.boards))
@@ -136,17 +172,7 @@ def new_word(game_code):
             
         player.answer_chosen = None
     
-    ### Create a leaderboard; a list of dictionaries with the player name and score
-    leaderboard = []
-    for player in game.players:
-        current_player_dict = {}
-        current_player_dict['name'] = player.name
-        current_player_dict['score'] = player.score
-        
-        leaderboard.append(current_player_dict)
-
-    # Sort the leaderboard so that the player with the highest score comes first
-    leaderboard.sort(key=lambda d: d['score'], reverse=True)
+    leaderboard = create_leaderboard(game)
 
     emit('leaderboard', {'leaderboard': leaderboard}, to=game_code)
     
@@ -193,6 +219,15 @@ def join_game_event(json):
         disconnect(socket_id)
         return
     
+    # Check if the name is a duplicate
+    player = game.get_player_by_name(name)
+
+    if player != None:
+        # Player with that same name already exists
+        emit('joinGameResponse', {'status': 409}, to=socket_id)
+        disconnect(socket_id)
+        return
+    
     player = Player(socket_id, name)
 
     game.players.append(player)
@@ -200,6 +235,39 @@ def join_game_event(json):
 
     emit('playerJoined', {'playerName', name}, to=game.host_socket_id) # Tell host that new player joined
     emit('joinGameResponse', {'status': 200}, to=socket_id) # Return 200 to new player
+
+@socket.on('removePlayer')
+def remove_player_event(json):
+    game_code = json['gameCode']
+    game = active_games[game_code]
+    name_of_player = json['nameOfPlayer']
+    socket_id = request.sid
+
+    if not(game_code in active_games.keys()):
+        emit('removePlayerResponse', {'status': 404}, to=socket_id)
+        return
+    else:
+        game = active_games['game_code']
+        host_socket_id = game.host_socket_id
+        
+        if host_socket_id != socket_id:
+            # Not the host, return 403
+            emit('removePlayerResponse', {'status': 403}, to=socket_id)
+            return
+
+    player = game.get_player_by_name(name_of_player)
+
+    if player == None:
+        emit('removePlayerResponse', {'status': 404, 'message': 'Player not found'}, to=socket_id)
+        return
+
+    # Remove the player from the Socket IO room
+    leave_room(game_code, player.socket_id)
+
+    game.players.remove(player)
+
+    # Tell the player that you were removed from the game
+    emit('playerRemoved', {'message': 'You were removed from the game'}, to=player.socket_id)
 
 @socket.on('startGame')
 def start_game_event(json):
@@ -274,9 +342,33 @@ def next_word_event(json):
 
     # Check if we should switch to the next board
     if game.words_displayed == 2:
+
+        if len(game.boards) == 0:
+            # Ran out of boards, end game
+            end_game()
+            return
+
         new_board(game_code)
     
     new_word(game_code)
 
+@socket.on('endGameRequest')
+def end_game_event(json):
+    game_code = json['gameCode']
+    socket_id = request.sid
+
+    if not(game_code in active_games.keys()):
+        emit('endGameResponse', {'status': 404}, to=socket_id)
+        return
+    else:
+        game = active_games['game_code']
+        host_socket_id = game.host_socket_id
+        
+        if host_socket_id != socket_id:
+            # Not the host, return 403
+            emit('endGameResponse', {'status': 403}, to=socket_id)
+            return
+    
+    end_game(game_code)
 
 app.run()
