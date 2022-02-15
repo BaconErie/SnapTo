@@ -371,4 +371,4 @@ def end_game_event(json):
     
     end_game(game_code)
 
-app.run()
+socket.run(app)
