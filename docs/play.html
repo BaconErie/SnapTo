@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Play Game - SnapTo!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body>
+
+        <div id="content-wrapper" class="vertical-layout">
+            <h1>SnapTo!</h1>
+
+            <form id="game-code-form">
+                <input id="game-code-input" type="text" placeholder="Enter game code">
+                <button type="submit">Join game</button>
+            </form>
+
+            <form id="name-form" class="default-hide">
+                <p>What's your name?</p>
+                <input id="name-input" type="text" placeholder="Enter your name">
+                <button type="submit">Play!</button>
+            </form>
+        </div>
+
+        <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
+        <script src="/scripts/CONFIG.js"></script>
+        <script src="/scripts/play.js"></script>
+    </body>
+</html>
