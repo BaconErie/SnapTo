@@ -1,10 +1,14 @@
-let gameCodeForm = document.getElementById('game-code-form');
-let gameCodeInput = document.getElementById('game-code-input');
+const gameCodeWrapper = document.getElementById('game-code-wrapper');
+const gameCodeForm = document.getElementById('game-code-form');
+const gameCodeInput = document.getElementById('game-code-input');
 
-let nameForm = document.getElementById('name-form');
-let nameInput = document.getElementById('name-input');
+const nameWrapper = document.getElementById('name-wrapper');
+const nameForm = document.getElementById('name-form');
+const nameInput = document.getElementById('name-input');
 
-let socket = io(SERVER_URL, {autoConnect: false});
+const lobbyWrapper = document.getElementById('lobby-wrapper');
+
+var socket = io(SERVER_URL, {autoConnect: false});
 
 function pingServer(){
     fetch(`${SERVER_URL}/ping/`).then(response => {
@@ -28,7 +32,7 @@ function pingServer(){
     })
 };
 
-async function enterGameCode(){
+async function enterGameCodeEvent(){
     var gameCode = gameCodeInput.value;
 
     let response = await fetch(`${SERVER_URL}/check/${gameCode}/`);
@@ -52,6 +56,46 @@ async function enterGameCode(){
     }
 
 
-    gameCodeForm.style.visibility = 'none';
-    nameForm.style.visibility = 'block';
+    gameCodeWrapper.style.visibility = 'none';
+    nameWrapper.style.visibility = 'block';
 }
+
+function joinGameEvent(){
+    var name = nameInput.value;
+    
+    socket.connect();
+
+    socket.emit('joinGame', {'gameCode': gameCode, 'name': name});
+}
+
+/********************
+SOCKET IO CONNECTIONS
+********************/
+
+socket.on('joinGameResponse', (json) => {
+    status = json['status']
+
+    if(status != 200){
+        switch(status){        
+            case 404:
+                alert('The game code you entered did not match any active games. Please check your game code and try again.');
+                nameWrapper.style.visibility = 'none';
+                gameCodeWrapper.style.visibility = 'block';
+                break;
+
+            case 401:
+                alert('Someone already has that same name! Please pick a different name');
+                break;
+            
+            default:
+                alert('An unknown error occured. Please contact the developer with the time you encountered this problem and the error code + ' + status);
+                break;
+        }
+
+        return;
+    }
+
+    nameWrapper.style.visibility = 'none';
+    lobbyWrapper.style.visibility = 'block';
+    
+});
