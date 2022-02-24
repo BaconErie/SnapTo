@@ -8,6 +8,8 @@ const nameInput = document.getElementById('name-input');
 
 const lobbyWrapper = document.getElementById('lobby-wrapper');
 
+const startingWrapper = document.getElementById('starting-wrapper')  
+
 var socket = io(SERVER_URL, {autoConnect: false});
 
 function pingServer(){
@@ -97,5 +99,9 @@ socket.on('joinGameResponse', (json) => {
 
     nameWrapper.style.visibility = 'none';
     lobbyWrapper.style.visibility = 'block';
-    
+});
+
+socket.on('startGame', (json) => {
+    lobbyWrapper.style.visibility = 'none';
+    startingWrapper.style.visibility = 'block';
 });
