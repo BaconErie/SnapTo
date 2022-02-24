@@ -10,5 +10,3 @@ Found a bug? Create a Github Issue.
 
 # License
 SnapTo is under the MIT license. Please read the full license in the LICENSE file.
-
-test
