@@ -146,7 +146,7 @@ def new_word(game_code):
 
     countdown_end = time() + 3
 
-    emit('countdown', {'time': countdown_end}, to=game_code)
+    emit('countdown', to=game_code)
     sleep(3)
 
     game.listen_for_answers = True
@@ -154,7 +154,7 @@ def new_word(game_code):
     game.words_displayed = game.words_displayed + 1
     sleep(3)
 
-    emit('stopAnswers', {}, to=game_code)
+    emit('stopAnswers', to=game_code)
     game.listen_for_answers = False
 
     for player in game.players:
