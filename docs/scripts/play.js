@@ -8,9 +8,17 @@ const nameInput = document.getElementById('name-input');
 
 const lobbyWrapper = document.getElementById('lobby-wrapper');
 
-const startingWrapper = document.getElementById('starting-wrapper')  
+const startingWrapper = document.getElementById('starting-wrapper');
+
+const playWrapper = document.getElementById('play-wrapper');
+const timer = document.getElementById('timer');
+const message = document.getElementById('message');
+const nameDisplay = document.getElementById('name');
+const scoreDisplay = document.getElementById('display');
 
 var socket = io(SERVER_URL, {autoConnect: false});
+
+var listeningForAnswers = false;
 
 function pingServer(){
     fetch(`${SERVER_URL}/ping/`).then(response => {
@@ -33,6 +41,28 @@ function pingServer(){
         }
     })
 };
+
+/***************
+HELPER FUNCTIONS
+***************/
+
+async function countdown(seconds){
+    let seconds_left = seconds - 1
+
+    timer.innerHTML = seconds;
+
+    let interval = setInterval(() => {
+        if(seconds_left == 0){
+            clearInterval(interval);
+        }
+
+        timer.innerHTML = seconds_left;
+    }, 1000);
+}
+
+/********************
+BUTTON EVENT HANDLERS
+********************/
 
 async function enterGameCodeEvent(){
     var gameCode = gameCodeInput.value;
@@ -104,4 +134,28 @@ socket.on('joinGameResponse', (json) => {
 socket.on('startGame', (json) => {
     lobbyWrapper.style.visibility = 'none';
     startingWrapper.style.visibility = 'block';
+    
+});
+
+socket.on('newBoard', (json) => {
+    // For start of game
+    if(startingWrapper.style.visibility == 'block'){
+        startingWrapper.style.visibility == 'none';
+        playWrapper.style.visibility == 'block';
+    }
+
+    message.innerHTML = 'Switching boards! Get ready...';
+    countdown(3);
+});
+
+socket.on('newWord', (json) => {
+    word = json['word'];
+    listeningForAnswers = true;
+    
+    message.innerHTML = 'Current word: ' + word;
+});
+
+socket.on('countdown', (json) => {
+    message.innerHTML = 'New word! Get ready...';
+    countdown(3);
 });
