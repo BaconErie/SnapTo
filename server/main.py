@@ -112,7 +112,7 @@ def pick_board(game):
     game.current_board = game.boards[index]
     game.boards.pop(index) # Remove the currently displayed board from boards
 
-async def start_game(game_code):
+def start_game(game_code):
     game = active_games[game_code]    
 
     emit('startGame', to=game_code) # Tell everyone in the room to start game
@@ -154,6 +154,7 @@ def new_word(game_code):
     game.words_displayed = game.words_displayed + 1
     sleep(3)
 
+    emit('stopAnswers', {}, to=game_code)
     game.listen_for_answers = False
 
     for player in game.players:

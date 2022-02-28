@@ -8,7 +8,7 @@
     <body>
 
         <div id="content-wrapper" class="vertical-layout">
-            <div id='game-code-wrapper'>
+            <div id="game-code-wrapper">
                 <h1>SnapTo!</h1>
                 
                 <form id="game-code-form">
@@ -18,7 +18,7 @@
                 </form>
             </div>
 
-            <div id='name-wrapper'>
+            <div id="name-wrapper">
                 <form id="name-form" class="default-hide">
                     <h1>What's your name?</h1>
                     <input id="name-input" type="text" placeholder="Enter your name">
@@ -26,16 +26,26 @@
                 </form>
             </div>
 
-            <div id='lobby-wrapper'>
+            <div id="lobby-wrapper">
                 <h1>Game joined!</h1>
                 <h2>Waiting for the game to start...</h2>
             </div>
 
-            <div id='starting-wrapper'>
+            <div id="starting-wrapper">
                 <h1>Game starting!</h1>
                 <h2>Get ready...</h2>
             </div>
-            
+
+            <div id="play-wrapper">
+                <div id="top-bar">
+                    <div id="timer">0</div>
+                    <div id="message">Game starting! Get ready...</div>
+                    <div id="player-info">
+                        <div id="name">Name</div>
+                        <div id="score">Score: 0</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
