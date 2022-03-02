@@ -129,7 +129,13 @@ def new_board(game_code):
     # We delete words we picked from the bucket
     game.word_bucket = game.current_board
 
-    emit('newBoard', {'board': game.current_board}, to=game_code) # Tell everyone newBoard
+    # Create a list of terms that only contain the id and image URL, not the answer
+    board_to_send = []
+    for term in game.current_board:
+        filtered_term = {'id': term['id'], 'url': term['url']}
+        board_to_send.append(filtered_term)
+
+    emit('newBoard', {'board': board_to_send}, to=game_code) # Tell everyone newBoard
     game.status = 'waitingForWord'
 
     game.words_displayed = 0
