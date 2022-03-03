@@ -15,6 +15,7 @@ const timer = document.getElementById('timer');
 const message = document.getElementById('message');
 const nameDisplay = document.getElementById('name');
 const scoreDisplay = document.getElementById('display');
+const termArea = document.getElementById('term-area');
 
 var socket = io(SERVER_URL, {autoConnect: false});
 
@@ -138,12 +139,32 @@ socket.on('startGame', (json) => {
 });
 
 socket.on('newBoard', (json) => {
+    board = json['board'];
+
     // For start of game
     if(startingWrapper.style.visibility == 'block'){
         startingWrapper.style.visibility == 'none';
         playWrapper.style.visibility == 'block';
     }
 
+    termTemplate = document.getElementById('term-TEMPLATE')
+    for(index in board){
+        term = board[index];
+        url = term['url'];
+        id = term['id'];
+        x = term['x'];
+        y = term['y'];
+        newTerm = termTemplate.cloneNode(true);
+
+        newTerm.dataSet.termId = id.tostring();
+        newTerm.src = url;
+
+        newTerm.style.left = x * (1/3)
+        newTerm.style.top = y * (1/3)
+
+        termArea.appendChild(newTerm)
+    }
+    
     message.innerHTML = 'Switching boards! Get ready...';
     countdown(3);
 });
