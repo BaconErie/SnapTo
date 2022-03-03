@@ -9,7 +9,6 @@ class Game:
         self.words_displayed = 0
         self.current_word = ''
         self.terms_bucket = []
-        self.status = None # "Depreciated", even tho im the author. Use game.listen_for_answers
         self.listen_for_answers = False
 
 class Player:

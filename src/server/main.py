@@ -116,7 +116,6 @@ def start_game(game_code):
     game = active_games[game_code]    
 
     emit('startGame', to=game_code) # Tell everyone in the room to start game
-    game.status = 'waitingGameStart'
 
     setup_boards(game)
 
@@ -136,7 +135,6 @@ def new_board(game_code):
         board_to_send.append(filtered_term)
 
     emit('newBoard', {'board': board_to_send}, to=game_code) # Tell everyone newBoard
-    game.status = 'waitingForWord'
 
     game.words_displayed = 0
 
