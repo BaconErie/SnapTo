@@ -3,7 +3,7 @@ SnapTo is a study game which tests the player's knowledge on the terms shown and
 Players are shown a board with images and a term, and players must choose the image that matches best with the term and choose it fast to score the most points.
 
 # Current Status
-SnapTo is currently under development. Expect the game to be finished in late February to early March.
+SnapTo is currently under development.
 
 # I found a bug!
 Found a bug? Create a Github Issue.
