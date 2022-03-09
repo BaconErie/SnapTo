@@ -79,7 +79,7 @@ def setup_boards(game):
                         # Same term, skip/continue
                         continue
                     
-                    if ((x <= (term_compare['x'] + 150)) and (x >= term_compare['x'])) and ((x <= (term_compare['y'] + 150)) and (x >= term_compare['y'])):
+                    if ((x <= (term_compare['x'] + 100)) and (x >= term_compare['x'])) and ((x <= (term_compare['y'] + 100)) and (x >= term_compare['y'])):
                         # Overlapping, change the current x and y values
                         term['x'] = randint(1, 300)
                         term['y'] = randint(1, 300)
