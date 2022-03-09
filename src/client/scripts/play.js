@@ -197,3 +197,12 @@ socket.on('countdown', (json) => {
     message.innerHTML = 'New word! Get ready...';
     countdown(3);
 });
+
+socket.on('answerResult', (json) => {
+    let correct = json['correct'];
+    let blank = json['blank'];
+    let correctAnswer = json['correctAnswer'];
+    let currentScore = json['currentScore'];
+
+    if blank 
+});
