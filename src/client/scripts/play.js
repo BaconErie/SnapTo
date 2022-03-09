@@ -20,6 +20,9 @@ const termArea = document.getElementById('term-area');
 var socket = io(SERVER_URL, {autoConnect: false});
 
 var listeningForAnswers = false;
+var answerElement;
+
+var gameCode;
 
 function pingServer(){
     fetch(`${SERVER_URL}/ping/`).then(response => {
@@ -66,7 +69,7 @@ BUTTON EVENT HANDLERS
 ********************/
 
 async function enterGameCodeEvent(){
-    var gameCode = gameCodeInput.value;
+    gameCode = gameCodeInput.value;
 
     let response = await fetch(`${SERVER_URL}/check/${gameCode}/`);
     if(response.status != 204 && response.status != 200){
@@ -99,6 +102,20 @@ function joinGameEvent(){
     socket.connect();
 
     socket.emit('joinGame', {'gameCode': gameCode, 'name': name});
+}
+
+function chooseTermEvent(event){
+    if(listeningForAnswers){
+        let term = event.target;
+        let termId = term.dataSet.termId;
+
+        term.style.border
+        listeningForAnswers = false;
+        answerElement = term;
+        socket.emit('chooseAnswer', {'gameCode': gameCode, 'answer': answer, 'termId': termId});
+
+        term.classList.add('selected-answer');
+    }
 }
 
 /********************
