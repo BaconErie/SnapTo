@@ -1,0 +1,14 @@
+.selected-answer {
+    border-style: solid;
+    border-color: #3DDB82;
+    border-radius: 5px;
+}
+
+.term {
+    width: 33%;
+    height: auto;
+}
+
+.hide {
+    display: none;
+}
