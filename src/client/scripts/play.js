@@ -17,6 +17,19 @@ const nameDisplay = document.getElementById('name');
 const scoreDisplay = document.getElementById('display');
 const termArea = document.getElementById('term-area');
 
+const blankModal = document.getElementById('blank-answer-result-modal');
+const blankResultWord = document.getElementById('blank-answer-result-word');
+const blankResultImage = document.getElementById('blank-answer-result-image');
+
+const correctModal = document.getElementById('correct-answer-result-modal');
+const correctResultWord = document.getElementById('correct-answer-result-word');
+const correctResultImage = document.getElementById('correct-answer-result-image');
+
+const incorrectModal = document.getElementById('incorrect-answer-result-modal');
+const incorrectResultWord = document.getElementById('incorrect-answer-result-word');
+const incorrectResultImage = document.getElementById('incorrect-answer-result-image');
+const pickedImage = document.getElementById('incorrect-answer-result-image');
+
 var socket = io(SERVER_URL, {autoConnect: false});
 
 var listeningForAnswers = false;
@@ -204,5 +217,8 @@ socket.on('answerResult', (json) => {
     let correctAnswer = json['correctAnswer'];
     let currentScore = json['currentScore'];
 
-    if blank 
+    if(blank){
+        // 
+        blankModal
+    }
 });
