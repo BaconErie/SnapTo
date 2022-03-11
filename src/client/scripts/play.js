@@ -218,7 +218,20 @@ socket.on('answerResult', (json) => {
     let currentScore = json['currentScore'];
 
     if(blank){
-        // 
-        blankModal
+        // Blank
+        blankResultWord.innerHTML = correctAnswer['term'];
+        blankResultImage.src = correctAnswer['url'];        
+    }else{
+        // Not blank, check if correct
+        if(correct){
+            // Correct yey
+            correctResultWord = correctAnswer['term'];
+            correctResultImage.src = correctAnswer['url'];
+        }else{
+            // Incorrect
+            incorrectResultWord = correctAnswer['term'];
+            incorrectResultImage.src = correctAnswer['url'];
+            pickedImage.src = answerElement.src;
+        }
     }
 });
