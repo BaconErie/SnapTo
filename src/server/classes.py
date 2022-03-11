@@ -10,6 +10,7 @@ class Game:
         self.current_word = ''
         self.terms_bucket = []
         self.listen_for_answers = False
+        self.waiting_for_leaderboard = False
 
 class Player:
     def __init__(self, socket_id, name):
