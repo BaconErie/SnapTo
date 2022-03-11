@@ -177,9 +177,16 @@ def new_word(game_code):
             
         player.answer_chosen = None
     
+    game.waiting_for_leaderboard = True
+    
+def show_leaderboard(game_code):
+    game = active_games[game_code]
+    
     leaderboard = create_leaderboard(game)
 
     emit('leaderboard', {'leaderboard': leaderboard}, to=game_code)
+
+    game.waiting_for_leaderboard = False
     
 ################
 # HTTTP ROUTES #
@@ -329,6 +336,24 @@ def choose_answer_event(json):
         return
     
     player.answer_chosen = answer
+
+@socket.on('showLeaderboard')
+def show_leaderboard_event(json):
+    game_code = json['gameCode']
+
+    # Check if game exists
+    if game_code not in active_games.keys():
+        emit('nextWordResponse', {'status': 404, 'message': 'Game not found'}, to=request.sid)
+        return
+    
+    game = active_games[game_code]
+    if request.sid != game.host_socket_id:
+        # Not the host, return 403
+        emit('nextWordResponse', {'status': 403, 'message': 'You are not the host'}, to=request.sid)
+        return
+
+    if game.waiting_for_leaderboard:
+            show_leaderboard(game_code)
 
 @socket.on('nextWord')
 def next_word_event(json):
