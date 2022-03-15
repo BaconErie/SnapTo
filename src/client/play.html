@@ -107,9 +107,6 @@
                             <div>Name</div>
                             <div>Score</div>
                         </div>
-                        <div id="leaderboard-filler">
-                            No one has scored yet
-                        </div>
                     </div>
                 </div>
             </div>
@@ -119,8 +116,8 @@
         <script src="/scripts/CONFIG.js"></script>
         <script src="/scripts/play.js"></script>
 
-        <img src="" class="term hide" data-term-id="">
-        <div class="leaderboard-entry">
+        <img src="" id="term-template" class="term hide" data-term-id="">
+        <div id="leaderboard-entry-template" class="leaderboard-entry hide">
             <div class="player-leaderboard-name">Name</div>
             <div class="player-leaderboard-score">0</div>
         </div>
