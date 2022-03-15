@@ -30,12 +30,19 @@ const incorrectResultWord = document.getElementById('incorrect-answer-result-wor
 const incorrectResultImage = document.getElementById('incorrect-answer-result-image');
 const pickedImage = document.getElementById('incorrect-answer-result-image');
 
+const leaderboardDiv = document.getElementById('leaderboard');
+const leaderboardFiller = document.getElementById('leaderboard-filler');
+const leaderboardTemplate = document.getElementById('leaderboard')
+
+const termTemplate = document.getElementById('term-template');
+const leaderboardEntryTemplate = document.getElementById('leaderboard-entry-template');
 var socket = io(SERVER_URL, {autoConnect: false});
 
 var listeningForAnswers = false;
 var answerElement;
 
 var gameCode;
+var name;
 
 function pingServer(){
     fetch(`${SERVER_URL}/ping/`).then(response => {
@@ -110,7 +117,7 @@ async function enterGameCodeEvent(){
 }
 
 function joinGameEvent(){
-    var name = nameInput.value;
+    name = nameInput.value;
     
     socket.connect();
 
@@ -136,7 +143,7 @@ SOCKET IO CONNECTIONS
 ********************/
 
 socket.on('joinGameResponse', (json) => {
-    status = json['status']
+    let status = json['status']
 
     if(status != 200){
         switch(status){        
@@ -169,7 +176,10 @@ socket.on('startGame', (json) => {
 });
 
 socket.on('newBoard', (json) => {
-    board = json['board'];
+    let board = json['board'];
+
+    // Hide the leaderboard
+    leaderboardDiv.style.display = 'block';
 
     // For start of game
     if(startingWrapper.style.visibility == 'block'){
@@ -177,14 +187,14 @@ socket.on('newBoard', (json) => {
         playWrapper.style.visibility == 'block';
     }
 
-    termTemplate = document.getElementById('term-TEMPLATE')
     for(index in board){
-        term = board[index];
-        url = term['url'];
-        id = term['id'];
-        x = term['x'];
-        y = term['y'];
+        let term = board[index];
+        let url = term['url'];
+        let id = term['id'];
+        let x = term['x'];
+        let y = term['y'];
         newTerm = termTemplate.cloneNode(true);
+        newTerm.id = ''; // Set the id to none since it is not a template
 
         newTerm.dataSet.termId = id.tostring();
         newTerm.src = url;
@@ -207,6 +217,9 @@ socket.on('newWord', (json) => {
 });
 
 socket.on('countdown', (json) => {
+    // Hide the leaderboard
+    leaderboardDiv.style.display = 'block';
+
     message.innerHTML = 'New word! Get ready...';
     countdown(3);
 });
@@ -225,13 +238,40 @@ socket.on('answerResult', (json) => {
         // Not blank, check if correct
         if(correct){
             // Correct yey
-            correctResultWord = correctAnswer['term'];
+            let correctResultWord = correctAnswer['term'];
             correctResultImage.src = correctAnswer['url'];
         }else{
             // Incorrect
-            incorrectResultWord = correctAnswer['term'];
+            let incorrectResultWord = correctAnswer['term'];
             incorrectResultImage.src = correctAnswer['url'];
             pickedImage.src = answerElement.src;
         }
     }
+});
+
+socket.on('leaderboard', (json) => {
+    let leaderboard = json['leaderboard'];
+
+    for(i in leaderboard){
+        let player = leaderboard[i];
+        
+        // Clone the template
+        let newLeaderboardEntry = leaderboardEntryTemplate.cloneNode(true);
+
+        // Set the new entry's id to none
+        newLeaderboardEntry.id = '';
+
+        // Add the name and score of the user
+        let nameEntryDisplay = newLeaderboardEntry.getElementsByClassName('player-leaderboard-name');
+        let scoreEntryDisplay = newLeaderboardEntry.getElementsByClassName('player-leaderboard-score');
+
+        // Parent the element to the leaderboard
+        leaderboardDiv.appendChild(newLeaderboardEntry);
+
+        // Show the leaderboard ENTRY (not the leaderboard)
+        newLeaderboardEntry.style.display = 'block';
+    }
+
+    // Show the leaderboard
+    leaderboardDiv.style.display = 'block';
 });
