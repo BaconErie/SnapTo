@@ -13,8 +13,9 @@ class Game:
         self.waiting_for_leaderboard = False
 
 class Player:
-    def __init__(self, socket_id, name):
+    def __init__(self, socket_id, name, game):
         self.name = name
         self.socket_id = socket_id
         self.score = 0
         self.answer_chosen = None
+        self.game = game
