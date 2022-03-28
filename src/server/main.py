@@ -29,6 +29,14 @@ def sort_players_by_score(game):
 
     return list_of_players
 
+def get_place_on_leaderboard(player):
+    game = player.game
+    
+    sorted_list_of_players = sort_players_by_score(game)
+    place = sorted_list_of_players.index(player)
+
+    return place
+
 def generate_game_code():
     new_game_code = randint(100000, 999999)
     if new_game_code in active_games.keys():
@@ -100,9 +108,10 @@ def end_game(game_code):
 
     emit('endGame', {'leaderboard': leaderboard}, to=host_socket_id)
 
-    # Then loop through all the players and send them
+    # Then loop through all the players and send them score and leaderboard place
     for player in game.players:
-        emit('endGameScore', {'score': player.score}, to=player.socket_id)
+        place = get_place_on_leaderboard(player)
+        emit('endGameScore', {'score': player.score, 'place': place}, to=player.socket_id)
 
     # Remove the game from the active games
     active_games.pop(game_code)
@@ -240,7 +249,7 @@ def join_game_event(json):
         disconnect(socket_id)
         return
     
-    player = Player(socket_id, name)
+    player = Player(socket_id, name, game)
 
     game.players.append(player)
     join_room(game_code, socket_id) # Add player to room
@@ -375,7 +384,7 @@ def next_word_event(json):
 
         if len(game.boards) == 0:
             # Ran out of boards, end game
-            end_game()
+            end_game(game_code)
             return
 
         new_board(game_code)
