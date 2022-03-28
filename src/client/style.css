@@ -1,0 +1,29 @@
+.selected-answer {
+    border-style: solid;
+    border-color: #3DDB82;
+    border-radius: 5px;
+}
+
+.term {
+    width: 33%;
+    height: auto;
+}
+
+.hide {
+    display: none;
+}
+
+/* Pro tips: 
+
+- Term area should be the same size as the term area wrapper
+- The modal thingy should be the same size as the term area wrapper
+- The default color of everything should be dark mode you know the color 
+- I really dont know the rest
+- The class result-info is a wrapper class that should be a flex box space around
+- Result-info-item should be slightly darker than the normal background color and should have rounded corners. Width = 25%
+- Answer-result-image width: width: 90% of parent, height: auto
+- Term-area-wrapper should have no padding
+- HEK NOTHING SHOULD HAVE PADDING OR MARGIN
+- Everything inside term-area-wrapper should have a width and height of 100%
+- answer-result-modal should have a background of normal you know etc
+*/

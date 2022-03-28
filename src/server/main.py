@@ -29,6 +29,14 @@ def sort_players_by_score(game):
 
     return list_of_players
 
+def get_place_on_leaderboard(player):
+    game = player.game
+    
+    sorted_list_of_players = sort_players_by_score(game)
+    place = sorted_list_of_players.index(player)
+
+    return place
+
 def generate_game_code():
     new_game_code = randint(100000, 999999)
     if new_game_code in active_games.keys():
@@ -79,7 +87,7 @@ def setup_boards(game):
                         # Same term, skip/continue
                         continue
                     
-                    if ((x <= (term_compare['x'] + 150)) and (x >= term_compare['x'])) and ((x <= (term_compare['y'] + 150)) and (x >= term_compare['y'])):
+                    if ((x <= (term_compare['x'] + 100)) and (x >= term_compare['x'])) and ((x <= (term_compare['y'] + 100)) and (x >= term_compare['y'])):
                         # Overlapping, change the current x and y values
                         term['x'] = randint(1, 300)
                         term['y'] = randint(1, 300)
@@ -100,9 +108,10 @@ def end_game(game_code):
 
     emit('endGame', {'leaderboard': leaderboard}, to=host_socket_id)
 
-    # Then loop through all the players and send them
+    # Then loop through all the players and send them score and leaderboard place
     for player in game.players:
-        emit('endGameScore', {'score': player.score}, to=player.socket_id)
+        place = get_place_on_leaderboard(player)
+        emit('endGameScore', {'score': player.score, 'place': place}, to=player.socket_id)
 
     # Remove the game from the active games
     active_games.pop(game_code)
@@ -116,7 +125,6 @@ def start_game(game_code):
     game = active_games[game_code]    
 
     emit('startGame', to=game_code) # Tell everyone in the room to start game
-    game.status = 'waitingGameStart'
 
     setup_boards(game)
 
@@ -129,8 +137,13 @@ def new_board(game_code):
     # We delete words we picked from the bucket
     game.word_bucket = game.current_board
 
-    emit('newBoard', {'board': game.current_board}, to=game_code) # Tell everyone newBoard
-    game.status = 'waitingForWord'
+    # Create a list of terms that only contain the id and image URL, not the answer
+    board_to_send = []
+    for term in game.current_board:
+        filtered_term = {'id': term['id'], 'url': term['url']}
+        board_to_send.append(filtered_term)
+
+    emit('newBoard', {'board': board_to_send}, to=game_code) # Tell everyone newBoard
 
     game.words_displayed = 0
 
@@ -146,7 +159,7 @@ def new_word(game_code):
 
     countdown_end = time() + 3
 
-    emit('countdown', {'time': countdown_end}, to=game_code)
+    emit('countdown', to=game_code)
     sleep(3)
 
     game.listen_for_answers = True
@@ -154,7 +167,7 @@ def new_word(game_code):
     game.words_displayed = game.words_displayed + 1
     sleep(3)
 
-    emit('stopAnswers', {}, to=game_code)
+    emit('stopAnswers', to=game_code)
     game.listen_for_answers = False
 
     for player in game.players:
@@ -173,9 +186,16 @@ def new_word(game_code):
             
         player.answer_chosen = None
     
+    game.waiting_for_leaderboard = True
+    
+def show_leaderboard(game_code):
+    game = active_games[game_code]
+    
     leaderboard = create_leaderboard(game)
 
     emit('leaderboard', {'leaderboard': leaderboard}, to=game_code)
+
+    game.waiting_for_leaderboard = False
     
 ################
 # HTTTP ROUTES #
@@ -229,7 +249,7 @@ def join_game_event(json):
         disconnect(socket_id)
         return
     
-    player = Player(socket_id, name)
+    player = Player(socket_id, name, game)
 
     game.players.append(player)
     join_room(game_code, socket_id) # Add player to room
@@ -326,6 +346,24 @@ def choose_answer_event(json):
     
     player.answer_chosen = answer
 
+@socket.on('showLeaderboard')
+def show_leaderboard_event(json):
+    game_code = json['gameCode']
+
+    # Check if game exists
+    if game_code not in active_games.keys():
+        emit('nextWordResponse', {'status': 404, 'message': 'Game not found'}, to=request.sid)
+        return
+    
+    game = active_games[game_code]
+    if request.sid != game.host_socket_id:
+        # Not the host, return 403
+        emit('nextWordResponse', {'status': 403, 'message': 'You are not the host'}, to=request.sid)
+        return
+
+    if game.waiting_for_leaderboard:
+            show_leaderboard(game_code)
+
 @socket.on('nextWord')
 def next_word_event(json):
     game_code = json['gameCode']
@@ -346,7 +384,7 @@ def next_word_event(json):
 
         if len(game.boards) == 0:
             # Ran out of boards, end game
-            end_game()
+            end_game(game_code)
             return
 
         new_board(game_code)

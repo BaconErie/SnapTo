@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Play Game - SnapTo!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+
+        <div id="content-wrapper" class="vertical-layout">
+            <div id="game-code-wrapper">
+                <h1>SnapTo!</h1>
+                
+                <form id="game-code-form">
+                    <h1>Enter game code</h1>
+                    <input id="game-code-input" type="text" placeholder="Enter game code">
+                    <button type="submit">Join game</button>
+                </form>
+            </div>
+
+            <div id="name-wrapper">
+                <form id="name-form" class="default-hide">
+                    <h1>What's your name?</h1>
+                    <input id="name-input" type="text" placeholder="Enter your name">
+                    <button type="submit">Play!</button>
+                </form>
+            </div>
+
+            <div id="lobby-wrapper">
+                <h1>Game joined!</h1>
+                <h2>Waiting for the game to start...</h2>
+            </div>
+
+            <div id="starting-wrapper">
+                <h1>Game starting!</h1>
+                <h2>Get ready...</h2>
+            </div>
+
+            <div id="play-wrapper">
+                <div id="top-bar">
+                    <div id="timer">0</div>
+                    <div id="message">Game starting! Get ready...</div>
+                    <div id="player-info">
+                        <div id="name">Name</div>
+                        <div id="score">Score: 0</div>
+                    </div>
+                </div>
+                
+
+                <div id="term-area-wrapper">
+                    <div id="correct-answer-result-modal" class="answer-result-modal">
+                        <h1>Correct!</h1>
+                        <div class="result-info">
+                            <div class="result-info-item">
+                                <h2>Word:</h2>
+                                <p id="correct-answer-result-word" class="answer-result-word"></p>
+                            </div>
+
+                            <div class="result-info-item">
+                                <h2>Correct Image:</h2>
+                                <img id="correct-answer-result-image" class="answer-result-image" src="" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="incorrect-answer-result-modal" class="answer-result-modal">
+                        <h1>Incorrect :(</h1>
+                        <div class="result-info">
+                            <div class="result-info-item">
+                                <h2>Word:</h2>
+                                <p id="incorrect-answer-result-word" class="answer-result-word"></p>
+                            </div>
+
+                            <div class="result-info-item">
+                                <h2>Correct Image:</h2>
+                                <img id="incorrect-answer-result-image" class="answer-result-image" src="" alt="">
+                            </div>
+
+                            <div class="result-info-item">
+                                <h2>You Picked:</h2>
+                                <img id="picked-answer-result-image" class="answer-result-image" src="" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="blank-answer-result-modal" class="answer-result-modal">
+                        <h1>You didn't answer in time</h1>
+                        <div class="result-info">
+                            <div class="result-info-item">
+                                <h2>Word:</h2>
+                                <p id="blank-answer-result-word" class="answer-result-word"></p>
+                            </div>
+
+                            <div class="result-info-item">
+                                <h2>Correct Image:</h2>
+                                <img id="blank-answer-result-image" class="answer-result-image" src="" alt="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="term-area">
+                    </div>
+
+                    <div id="leaderboard">
+                        <div id="leaderboard-header">
+                            <div>Name</div>
+                            <div>Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
+        <script src="/scripts/CONFIG.js"></script>
+        <script src="/scripts/play.js"></script>
+
+        <img src="" id="term-template" class="term hide" data-term-id="">
+        <div id="leaderboard-entry-template" class="leaderboard-entry hide">
+            <div class="player-leaderboard-name">Name</div>
+            <div class="player-leaderboard-score">0</div>
+        </div>
+    </body>
+</html>
